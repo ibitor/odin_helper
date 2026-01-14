@@ -10,42 +10,31 @@
       <main class="container">
         <header class="header">
           <h1>Odin Helper</h1>
-          <p>分栏视图展示请求与页面入口。</p>
+          <p>工具站 · JSON Repair</p>
         </header>
-        <section class="columns">
-          <article class="panel">
-            <h2>请求示例</h2>
-            <p>使用以下命令发起请求：</p>
-            <pre><code>curl 'https://capi.e.kuaishou.com/rest/crm/salesCopilot/backdoor/chat/analysisNoCrossOrigin' \
-  -H 'accept: */*' \
-  -H 'accept-language: zh-CN,zh;q=0.9' \
-  -H 'content-type: application/json' \
-  -H 'k-ad-infra-tenant: aiSocialAssistant' \
-  -H 'k-crm-system-id: 1' \
-  -H 'k-user-name: lizhiyou' \
-  -H 'origin: https://ad-crm.corp.kuaishou.com' \
-  -H 'priority: u=1, i' \
-  -H 'referer: https://ad-crm.corp.kuaishou.com/' \
-  -H 'sec-ch-ua: "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"' \
-  -H 'sec-ch-ua-mobile: ?0' \
-  -H 'sec-ch-ua-platform: "macOS"' \
-  -H 'sec-fetch-dest: empty' \
-  -H 'sec-fetch-mode: cors' \
-  -H 'sec-fetch-site: same-site' \
-  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36' \
-  --data-raw '{"message":"发布视频的时候就需要购买爆单卡是为什么"}'</code></pre>
-          </article>
-          <article class="panel">
-            <h2>页面入口</h2>
-            <p>在当前页面内嵌打开：</p>
-            <div class="iframe-shell">
-              <iframe
-                title="CRM 页面"
-                src="https://ad-crm.corp.kuaishou.com/crm-v2/intelligent/custom/pc/user?tenant=aiSocialAssistant"
-              ></iframe>
+        <section class="tool-card">
+          <div class="tool-header">
+            <div>
+              <h2>JSON Repair</h2>
+              <p>将不规范的 JSON 自动修复为可解析格式，并支持格式化输出。</p>
             </div>
-            <p class="hint">如需在同域环境下访问，请确保已登录并具备权限。</p>
-          </article>
+            <div class="actions">
+              <button id="repair">修复并格式化</button>
+              <button class="ghost" id="copy">复制结果</button>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label for="input">待修复 JSON</label>
+              <textarea id="input" placeholder="粘贴原始 JSON 或类 JSON 内容..."></textarea>
+            </div>
+            <div class="field">
+              <label for="output">修复结果</label>
+              <textarea id="output" readonly placeholder="修复后的 JSON 会显示在这里"></textarea>
+            </div>
+          </div>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+          <p class="hint">提示：支持去除 JSON 代码块包裹、修复尾逗号、补全双引号等常见问题。</p>
         </section>
       </main>
     </div>
