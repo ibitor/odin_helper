@@ -13,6 +13,7 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   padding: 2.5rem 1.5rem;
 }
 
@@ -175,5 +176,11 @@ textarea:read-only {
 
   textarea {
     min-height: 220px;
+  }
+}
+
+@media (min-width: 1200px) {
+  textarea {
+    min-height: 360px;
   }
 }
