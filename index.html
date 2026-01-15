@@ -8,10 +8,34 @@
   <body>
     <div id="app">
       <main class="container">
-        <h1>Odin Helper</h1>
-        <p>项目已初始化，准备部署到 Vercel。</p>
-        <button id="ping">点我测试</button>
-        <p id="status" aria-live="polite"></p>
+        <header class="header">
+          <h1>Odin Helper</h1>
+          <p>工具站 · JSON Repair</p>
+        </header>
+        <section class="tool-card">
+          <div class="tool-header">
+            <div>
+              <h2>JSON Repair</h2>
+              <p>将不规范的 JSON 自动修复为可解析格式，并支持格式化输出。</p>
+            </div>
+            <div class="actions">
+              <button id="repair">修复并格式化</button>
+              <button class="ghost" id="copy">复制结果</button>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label for="input">待修复 JSON</label>
+              <textarea id="input" placeholder="粘贴原始 JSON 或类 JSON 内容..."></textarea>
+            </div>
+            <div class="field">
+              <label for="output">修复结果</label>
+              <textarea id="output" readonly placeholder="修复后的 JSON 会显示在这里"></textarea>
+            </div>
+          </div>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+          <p class="hint">提示：支持去除 JSON 代码块包裹、修复尾逗号、补全双引号等常见问题。</p>
+        </section>
       </main>
     </div>
     <script type="module" src="/src/main.js"></script>
