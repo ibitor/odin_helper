@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Odin Helper · 多日志查看</title>
+    <title>Odin Helper · 多日志查看 & JSON Repair</title>
     <link rel="stylesheet" href="src/style.css" />
   </head>
   <body>
@@ -16,38 +16,51 @@
           <div class="brand-mark">OH</div>
           <div>
             <p class="brand-name">Odin Helper</p>
-            <p class="brand-tag">多日志查看工具</p>
+            <p class="brand-tag">多日志查看 · JSON Repair</p>
           </div>
         </div>
 
-        <div class="panel">
-          <div class="panel-title">路径参数</div>
-          <p class="panel-desc">优先使用输入框，URL 参数用于初始化。</p>
-          <label class="field">
-            <span>参数值</span>
-            <input id="paramInput" type="text" placeholder="例如：today_news" />
-          </label>
-          <div class="panel-actions">
-            <button class="primary" id="applyParam">生成视图</button>
-            <button class="ghost" id="clearParam">清空</button>
+        <div id="logControls" class="tool-panel">
+          <div class="panel">
+            <div class="panel-title">路径参数</div>
+            <p class="panel-desc">优先使用输入框，URL 参数用于初始化。</p>
+            <label class="field">
+              <span>参数值</span>
+              <input id="paramInput" type="text" placeholder="例如：today_news" />
+            </label>
+            <div class="panel-actions">
+              <button class="primary" id="applyParam">生成视图</button>
+              <button class="ghost" id="clearParam">清空</button>
+            </div>
+            <p class="panel-tip">URL 初始化格式：<code>?param=today_news</code></p>
           </div>
-          <p class="panel-tip">URL 初始化格式：<code>?param=today_news</code></p>
-        </div>
 
           <div class="panel">
             <div class="panel-title">日志源地址</div>
             <div id="baseList" class="base-list"></div>
-          <p class="panel-tip">当前默认配置 Baidu + Bing，可在代码中替换。</p>
+            <p class="panel-tip">当前默认配置 Baidu + Bing，可在代码中替换。</p>
           </div>
+        </div>
+
+        <div id="jsonControls" class="tool-panel is-hidden">
+          <div class="panel">
+            <div class="panel-title">JSON Repair</div>
+            <p class="panel-desc">自动修复常见 JSON 格式问题。</p>
+            <div class="panel-tip">
+              <p>支持：注释移除、尾逗号清理、单引号修复、键名补引号。</p>
+              <p>输出为标准 JSON 并格式化。</p>
+            </div>
+          </div>
+        </div>
       </aside>
 
       <main class="workspace">
         <header class="workspace-header">
           <div>
             <p class="workspace-label">当前视图</p>
-            <h1>多日志查看</h1>
+            <h1 id="viewTitle">多日志查看</h1>
             <p class="workspace-sub" id="statusText">请输入参数后生成多窗口视图。</p>
-            <p class="workspace-note">部分站点可能禁止 iframe，可使用“新窗口打开”。</p>
+            <p class="workspace-note" id="iframeNote">部分站点可能禁止 iframe，可使用“新窗口打开”。</p>
           </div>
           <div class="workspace-actions">
             <button class="ghost" id="reloadFrames">刷新全部</button>
@@ -55,13 +68,41 @@
           </div>
         </header>
 
-        <section id="emptyState" class="empty-state">
-          <h2>还没有参数</h2>
-          <p>输入关键词或路径参数后，系统会同时打开多个日志页面。</p>
-          <code>?param=today_news</code>
+        <div class="mode-tabs">
+          <button class="mode-tab is-active" data-mode="log">多日志查看</button>
+          <button class="mode-tab" data-mode="json">JSON Repair</button>
+        </div>
+
+        <section id="logMode" class="mode-panel">
+          <div id="emptyState" class="empty-state">
+            <h2>还没有参数</h2>
+            <p>输入关键词或路径参数后，系统会同时打开多个日志页面。</p>
+            <code>?param=today_news</code>
+          </div>
+
+          <div id="framesGrid" class="frames-grid"></div>
         </section>
 
-        <section id="framesGrid" class="frames-grid"></section>
+        <section id="jsonMode" class="mode-panel is-hidden">
+          <div class="json-actions">
+            <button class="primary" id="repairJson">修复并格式化</button>
+            <button class="ghost" id="copyJson">复制输出</button>
+            <button class="ghost" id="clearJson">清空</button>
+          </div>
+          <div class="json-grid">
+            <div class="json-panel">
+              <div class="json-panel-title">输入</div>
+              <textarea id="jsonInput" placeholder="粘贴 JSON / 近似 JSON 内容…"></textarea>
+            </div>
+            <div class="json-panel">
+              <div class="json-panel-title">输出</div>
+              <pre id="jsonOutput" class="json-output">等待修复…</pre>
+            </div>
+          </div>
+          <p class="json-status" id="jsonStatus">
+            支持去除注释、修复尾逗号、补全引号等。
+          </p>
+        </section>
       </main>
     </div>
 
