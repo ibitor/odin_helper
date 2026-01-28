@@ -1,63 +1,156 @@
-import './style.css';
+const baseUrls = [
+  {
+    name: "Baidu Search",
+    url: "https://www.baidu.com/s?wd=",
+  },
+  {
+    name: "Bing Search",
+    url: "https://www.bing.com/search?q=",
+  },
+];
 
-const input = document.querySelector('#input');
-const output = document.querySelector('#output');
-const repairButton = document.querySelector('#repair');
-const copyButton = document.querySelector('#copy');
-const status = document.querySelector('#status');
+const paramKey = "param";
 
-const stripCodeFence = (text) => {
-  const trimmed = text.trim();
-  if (trimmed.startsWith('```')) {
-    return trimmed.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+const paramInput = document.querySelector("#paramInput");
+const applyBtn = document.querySelector("#applyParam");
+const clearBtn = document.querySelector("#clearParam");
+const baseList = document.querySelector("#baseList");
+const framesGrid = document.querySelector("#framesGrid");
+const emptyState = document.querySelector("#emptyState");
+const reloadFramesBtn = document.querySelector("#reloadFrames");
+const openAllBtn = document.querySelector("#openAll");
+const statusText = document.querySelector("#statusText");
+
+function getParamFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(paramKey) || "";
+}
+
+function updateUrlParam(value) {
+  const params = new URLSearchParams(window.location.search);
+  if (value) {
+    params.set(paramKey, value);
+  } else {
+    params.delete(paramKey);
   }
-  return trimmed;
-};
+  const query = params.toString();
+  const newUrl = query
+    ? `${window.location.pathname}?${query}`
+    : window.location.pathname;
+  window.history.replaceState({}, "", newUrl);
+}
 
-const repairJsonText = (text) => {
-  let candidate = stripCodeFence(text);
-  candidate = candidate.replace(/,\s*([}\]])/g, '$1');
-  candidate = candidate.replace(/([{,]\s*)([A-Za-z0-9_]+)\s*:/g, '$1"$2":');
-  candidate = candidate.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, '"$1"');
-  return candidate;
-};
+function renderBaseList() {
+  baseList.innerHTML = "";
+  baseUrls.forEach((item) => {
+    const div = document.createElement("div");
+    div.className = "base-item";
 
-const setStatus = (message, kind = 'info') => {
-  if (!status) return;
-  status.textContent = message;
-  status.dataset.kind = kind;
-};
+    const strong = document.createElement("strong");
+    strong.textContent = item.name;
+    const span = document.createElement("span");
+    span.textContent = item.url;
 
-const handleRepair = () => {
-  if (!input || !output) return;
-  if (!input.value.trim()) {
-    output.value = '';
-    setStatus('请输入需要修复的内容。', 'warning');
+    div.append(strong, span);
+    baseList.append(div);
+  });
+}
+
+function buildTargetUrl(baseUrl, value) {
+  return `${baseUrl}${encodeURIComponent(value)}`;
+}
+
+function renderFrames(value) {
+  framesGrid.innerHTML = "";
+
+  if (!value) {
+    emptyState.style.display = "block";
+    statusText.textContent = "请输入参数后生成多窗口视图。";
     return;
   }
-  const repaired = repairJsonText(input.value);
-  try {
-    const parsed = JSON.parse(repaired);
-    output.value = JSON.stringify(parsed, null, 2);
-    setStatus('修复完成 ✅', 'success');
-  } catch (error) {
-    output.value = repaired;
-    setStatus(`仍无法解析，请检查格式：${error.message}`, 'error');
-  }
-};
 
-const handleCopy = async () => {
-  if (!output?.value) {
-    setStatus('暂无可复制内容。', 'warning');
-    return;
-  }
-  try {
-    await navigator.clipboard.writeText(output.value);
-    setStatus('已复制到剪贴板。', 'success');
-  } catch (error) {
-    setStatus(`复制失败：${error.message}`, 'error');
-  }
-};
+  emptyState.style.display = "none";
+  statusText.textContent = `已生成 ${baseUrls.length} 个视图 · 参数：${value}`;
 
-repairButton?.addEventListener('click', handleRepair);
-copyButton?.addEventListener('click', handleCopy);
+  baseUrls.forEach((item) => {
+    const targetUrl = buildTargetUrl(item.url, value);
+    const drawer = document.createElement("details");
+    drawer.className = "frame-drawer";
+    drawer.open = true;
+
+    const summary = document.createElement("summary");
+    summary.className = "frame-summary";
+
+    const titleSpan = document.createElement("span");
+    titleSpan.className = "frame-title";
+    const strong = document.createElement("strong");
+    strong.textContent = item.name;
+    titleSpan.append(strong, document.createTextNode(` · ${targetUrl}`));
+
+    const actions = document.createElement("div");
+    actions.className = "frame-actions";
+    const link = document.createElement("a");
+    link.href = targetUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = "新窗口打开";
+    link.addEventListener("click", (event) => event.stopPropagation());
+    actions.append(link);
+
+    summary.append(titleSpan, actions);
+
+    const body = document.createElement("div");
+    body.className = "frame-body";
+
+    const frame = document.createElement("iframe");
+    frame.title = item.name;
+    frame.src = targetUrl;
+    frame.loading = "lazy";
+
+    body.append(frame);
+    drawer.append(summary, body);
+    framesGrid.append(drawer);
+  });
+}
+
+function refreshFrames() {
+  framesGrid.querySelectorAll("iframe").forEach((frame) => {
+    frame.src = frame.src;
+  });
+}
+
+function openAllFrames() {
+  const value = paramInput.value.trim();
+  if (!value) return;
+  baseUrls.forEach((item) => {
+    window.open(buildTargetUrl(item.url, value), "_blank");
+  });
+}
+
+applyBtn.addEventListener("click", () => {
+  const value = paramInput.value.trim();
+  updateUrlParam(value);
+  renderFrames(value);
+});
+
+paramInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    applyBtn.click();
+  }
+});
+
+clearBtn.addEventListener("click", () => {
+  paramInput.value = "";
+  updateUrlParam("");
+  renderFrames("");
+});
+
+reloadFramesBtn.addEventListener("click", refreshFrames);
+openAllBtn.addEventListener("click", openAllFrames);
+
+renderBaseList();
+
+const initialParam = getParamFromUrl();
+paramInput.value = initialParam;
+renderFrames(initialParam);
